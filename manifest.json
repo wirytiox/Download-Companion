@@ -1,0 +1,14 @@
+{
+    "manifest_version": 3,
+    "name": "Add /download to Links",
+    "version": "1.0",
+    "description": "A Chrome extension to modify the link URL and add /download.",
+    "background": {
+      "service_worker": "background.js"
+    },
+    "permissions": ["scripting", "webNavigation"],
+    "host_permissions": ["<all_urls>"],
+    "action": {},
+    "manifest_action": {}
+  }
+  
