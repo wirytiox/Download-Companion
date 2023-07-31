@@ -1,35 +1,37 @@
-chrome.webNavigation.onBeforeNavigate.addListener(function(details) {
+function modifyUrlAndCreateTab(details) {
   const { tabId, url } = details;
   const modifiedUrl = new URL(url);
-  modifiedUrl.pathname += "download";
-  
+
   if (url.startsWith("https://nhentai.net/g/") && !url.includes("/download")) {
-    chrome.scripting.executeScript({
-      target: { tabId },
-      func: (modifiedUrl) => {
-        const links = document.getElementsByTagName('a');
-        for (let i = 0; i < links.length; i++) {
-          const link = links[i];
-          if (link.href === modifiedUrl) {
-            link.href += 'download';
-            break;
-          }
-        }
-        console.log('URL modified:', modifiedUrl);
-      },
-      args: [modifiedUrl.href]
-    });
+    if (modifiedUrl.pathname.endsWith("/download")) {
+      chrome.webNavigation.onBeforeNavigate.removeListener(modifyUrlAndCreateTab);
+    } else {
+      modifiedUrl.pathname += "/download";
+      chrome.tabs.remove(tabId, function() {
+        chrome.tabs.create({ url: modifiedUrl.href });
+      });
+    }
+  }
+}
+
+chrome.storage.sync.get('sliderState', (result) => {
+  const isSliderOn = result.sliderState ?? false;
+
+  if (isSliderOn) {
+    chrome.webNavigation.onBeforeNavigate.addListener(modifyUrlAndCreateTab);
   }
 });
 
-chrome.webNavigation.onBeforeNavigate.addListener(function(details) {
-  const { tabId, url } = details;
-  const modifiedUrl = new URL(url);
-  modifiedUrl.pathname += "/download";
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.sliderState !== undefined) {
+    const isSliderOn = message.sliderState;
 
-  if (url.startsWith("https://nhentai.net/g/") && !url.includes("/download")) {
-    chrome.tabs.remove(tabId, function() {
-      chrome.tabs.create({ url: modifiedUrl.href });
-    });
+    if (isSliderOn) {
+      chrome.webNavigation.onBeforeNavigate.addListener(modifyUrlAndCreateTab);
+    } else {
+      chrome.webNavigation.onBeforeNavigate.removeListener(modifyUrlAndCreateTab);
+    }
+
+    chrome.storage.sync.set({ sliderState: isSliderOn });
   }
 });

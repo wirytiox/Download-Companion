@@ -1,0 +1,77 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 15px;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  width: 200px; /* Adjust the width to fit the slider and message properly */
+}
+
+.slider-message {
+  margin-right: 10px; /* Reduce the margin to align the message better */
+}
+
+/* Custom Slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px; /* Increase the width to make the slider longer */
+  height: 24px; /* Increase the height to make the slider taller */
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0; /* Remove the left and right adjustments */
+  bottom: 0;
+  width: 50px; /* Set the width to match the parent switch width */
+  background-color: #ccc;
+  border-radius: 24px; /* Increase the border-radius to make it a round slider */
+  transition: background-color 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px; /* Adjust the height to match the slider height */
+  width: 20px; /* Adjust the width to match the slider height */
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px); /* Increase the translation to make it fit properly */
+}
+
+/* Additional styles for the button */
+.run-button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.run-button:hover {
+  background-color: #45a049;
+}

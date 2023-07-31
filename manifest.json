@@ -1,14 +1,21 @@
 {
-    "manifest_version": 3,
-    "name": "Add /download to Links",
-    "version": "1.0",
-    "description": "A Chrome extension to modify the link URL and add /download.",
-    "background": {
-      "service_worker": "background.js"
-    },
-    "permissions": ["scripting", "webNavigation"],
-    "host_permissions": ["<all_urls>"],
-    "action": {},
-    "manifest_action": {}
+  "manifest_version": 3,
+  "name": "Nhentai Downloader Helper",
+  "version": "1.0",
+  "description": "Description of your extension",
+  "permissions": ["scripting", "webNavigation", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.js", "popup.css"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {}
+  },
+  "background": {
+    "service_worker": "background.js"
   }
-  
+}
