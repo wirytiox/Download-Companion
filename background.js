@@ -6,9 +6,9 @@ function modifyUrlAndCreateTab(details) {
     if (modifiedUrl.pathname.endsWith("/download")) {
       chrome.webNavigation.onBeforeNavigate.removeListener(modifyUrlAndCreateTab);
     } else {
-      modifiedUrl.pathname += "/download";
+      modifiedUrl.pathname += "download";
       chrome.tabs.remove(tabId, function() {
-        chrome.tabs.create({ url: modifiedUrl.href });
+        chrome.tabs.create({ url: modifiedUrl.href, active: false });  // Opens the tab in the background
       });
     }
   }
