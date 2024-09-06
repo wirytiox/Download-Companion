@@ -1,29 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Slider Extension Popup</title>
+  <title>Link Appender</title>
   <link rel="stylesheet" href="popup.css">
-  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Slider to enable URL appending -->
   <div class="slider-container">
-    <div class="slider-message">Activate Auto Download:</div>
+    <div class="slider-message">Enable URL Appending:</div>
     <label class="switch">
-      <input type="checkbox" id="slider">
+      <input type="checkbox" id="appendSlider">
       <span class="slider round"></span>
     </label>
   </div>
 
+  <div class="slider-container">
+    <div class="slider-message">Activate Auto Download:</div>
+    <label class="switch">
+      <input type="checkbox" id="autoDownloadSlider">
+      <span class="slider round"></span>
+    </label>
+  </div>
+  <!-- Input box for the text to append with placeholder -->
+  <div class="input-container">
+    <label for="appendText">Text to Append:</label>
+    <input type="text" id="appendText" placeholder="download"> <!-- Placeholder set to 'download' -->
+  </div>
+
+  <!-- Slider to enable automatic download -->
 
 
+  <!-- Slider to enable path checking for autodownload -->
 
 
-  i recomend you to download stuff using transmission, set a folder as default download folder in your browser.
-  and then set that same folder as default in transmission and enable auto-add torrents.
-  
-  <a href="https://transmissionbt.com/" target="_blank">
-    <button>Click me to download Transmission</button>
-  </a>
+  <!-- Input box for the path check with placeholder -->
+  <div class="slider-container">
+    <div class="slider-message">Only work if this path is present:</div>
+    <label class="switch">
+      <input type="checkbox" id="pathCheckSlider">
+      <span class="slider round"></span>
+    </label>
+  </div>
+  <div class="input-container">
+    <label for="pathCheckText">Required Path:</label>
+    <input type="text" id="pathCheckText" placeholder="g/"> <!-- Placeholder set to 'g/' -->
+  </div>
+
   <script src="popup.js"></script>
 </body>
 </html>

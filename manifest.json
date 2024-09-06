@@ -1,23 +1,28 @@
 {
   "manifest_version": 3,
-  "name": "Nhentai Downloader Helper",
-  "version": "1.3",
-  "description": "Easily download torrents from nhentai.net with a single middle click.",
-"permissions": ["webNavigation", "storage", "downloads"],
-
-  "host_permissions": ["https://nhentai.net/*"],
+  "name": "Automatic Link Appender",
+  "version": "1.4.0",
+  "description": "Easily download files from simple download links with a single middle click.",
+  "permissions": [
+    "webNavigation", 
+    "storage", 
+    "downloads"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "web_accessible_resources": [
     {
       "resources": ["popup.js", "popup.css"],
-      "matches": ["https://nhentai.net/*"]
+      "matches": ["<all_urls>"]
     }
   ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16":"logos/logo_16x16_transparent.png",
-      "32":"logos/logo_32x32_transparent.png",
-      "48":"logos/logo_48x48_transparent.png"
+      "16": "logos/logo_16x16_transparent.png",
+      "32": "logos/logo_32x32_transparent.png",
+      "48": "logos/logo_48x48_transparent.png"
     }
   },
   "background": {
