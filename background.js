@@ -40,17 +40,18 @@ function modifyUrlAndPerformAction(details) {
     if (autoDownloadState) {
       if (needsRedirection) {
         // Only download from the modified URL directly (without redirecting the tab)
-        chrome.downloads.download({
-          url: modifiedUrl.href,  // Use the modified URL for the download
-          conflictAction: 'uniquify',  // Handle filename conflicts
-          saveAs: true  // Show "Save As" dialog
-        }, function (downloadId) {
-          if (chrome.runtime.lastError) {
-            console.error("Download failed:", chrome.runtime.lastError);
-          } else {
-            console.log("Download started with ID:", downloadId);
-          }
-        });
+// Trigger the download without prompting "Save As"
+chrome.downloads.download({
+  url: modifiedUrl.href,  // Use the modified URL for the download
+  conflictAction: 'uniquify'  // Handle filename conflicts (download without asking)
+}, function (downloadId) {
+  if (chrome.runtime.lastError) {
+    console.error("Download failed:", chrome.runtime.lastError);
+  } else {
+    console.log("Download started with ID:", downloadId);
+  }
+});
+
 
         // Close the current tab after download, but avoid redirection
         chrome.tabs.remove(tabId);
