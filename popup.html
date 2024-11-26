@@ -31,8 +31,23 @@
 
 
   <!-- Slider to enable path checking for autodownload -->
-
-
+  <div class="input-container">
+    <label for="qbUsername">QB Username:</label>
+    <input type="text" id="qbUsername" placeholder="admin"> <!-- Placeholder set to default -->
+  </div>
+  <div class="input-container">
+    <label for="qbPassword">QB Password:</label>
+    <input type="password" id="qbPassword" placeholder="admin admin"> <!-- Placeholder set to default -->
+  </div>
+  <div class="input-container">
+    <label for="qbServer">QBittorrent Server:</label>
+    <input type="text" id="qbServer" placeholder="http://localhost:8081"> <!-- Default set to localhost -->
+  </div>
+    
+  <div class="slider-container">
+    <button id="sendCurrentUrlButton" class="run-button">Send Current URL</button>
+  </div>
+  
   <!-- Input box for the path check with placeholder -->
   <div class="slider-container">
     <div class="slider-message">Only work if this path is present:</div>

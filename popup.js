@@ -41,3 +41,76 @@ document.addEventListener('DOMContentLoaded', function () {
     chrome.storage.sync.set({ pathCheckText });
   });
 });
+document.getElementById('sendCurrentUrlButton').addEventListener('click', function () {
+  chrome.storage.sync.get(['qbusername', 'qbpassword', 'qbServer'], (result) => {
+    const qbusername = result.qbusername || 'admin';
+    const qbpassword = result.qbpassword || 'admin admin';
+    const qbServer = result.qbServer || 'http://localhost:8081';
+
+    // Get the active tab
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      if (tabs.length === 0) return;
+      const currentTabUrl = tabs[0].url;
+
+      // Check if the URL contains '/g/'
+      if (!currentTabUrl.includes('/g/')) {
+        alert('The current URL does not match the required pattern.');
+        return;
+      }
+
+      // Send the URL to your Flask server
+      fetch('http://127.0.0.1:5050/download', {  // Replace with your Flask server URL
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: currentTabUrl,
+          sessionid: 'u2krtexbnyx58xkjwye6r7e6jza6h35r', // Replace with dynamic session ID if needed
+          qbusername: qbusername,
+          qbpassword: qbpassword,
+          qbServer: qbServer
+        })
+      })
+        .then(response => response.json())
+        .then(data => alert(data.message || 'URL sent successfully!'))
+        .catch(error => console.error('Error:', error));
+    });
+  });
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  const qbUsernameInput = document.getElementById('qbUsername');
+  const qbPasswordInput = document.getElementById('qbPassword');
+
+  // Load initial values for QB Username and Password
+  chrome.storage.sync.get(['qbusername', 'qbpassword'], (result) => {
+    qbUsernameInput.value = result.qbusername || 'admin'; // Default is 'admin'
+    qbPasswordInput.value = result.qbpassword || 'admin admin'; // Default is 'admin admin'
+  });
+
+  // Save QB Username when input changes
+  qbUsernameInput.addEventListener('input', () => {
+    const qbusername = qbUsernameInput.value || 'admin'; // Use 'admin' if input is empty
+    chrome.storage.sync.set({ qbusername });
+  });
+
+  // Save QB Password when input changes
+  qbPasswordInput.addEventListener('input', () => {
+    const qbpassword = qbPasswordInput.value || 'admin admin'; // Use 'admin admin' if input is empty
+    chrome.storage.sync.set({ qbpassword });
+  });
+});
+document.addEventListener('DOMContentLoaded', function () {
+  const qbServerInput = document.getElementById('qbServer');
+
+  // Load initial value for QB Server
+  chrome.storage.sync.get(['qbServer'], (result) => {
+    qbServerInput.value = result.qbServer || 'http://localhost:8081'; // Default is 'http://localhost:8081'
+  });
+
+  // Save QB Server when input changes
+  qbServerInput.addEventListener('input', () => {
+    const qbServer = qbServerInput.value || 'http://localhost:8081'; // Use default if input is empty
+    chrome.storage.sync.set({ qbServer });
+  });
+});
