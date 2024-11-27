@@ -42,40 +42,47 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 document.getElementById('sendCurrentUrlButton').addEventListener('click', function () {
-  chrome.storage.sync.get(['qbusername', 'qbpassword', 'qbServer'], (result) => {
-    const qbusername = result.qbusername || 'admin';
-    const qbpassword = result.qbpassword || 'admin admin';
-    const qbServer = result.qbServer || 'http://localhost:8081';
-
-    // Get the active tab
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs.length === 0) return;
-      const currentTabUrl = tabs[0].url;
+      const currentTab = tabs[0];
 
-      // Check if the URL contains '/g/'
-      if (!currentTabUrl.includes('/g/')) {
-        alert('The current URL does not match the required pattern.');
-        return;
-      }
+      // Get cookies for the active tab
+      chrome.cookies.getAll({ url: currentTab.url }, function (cookies) {
+          const sessionid = cookies.find(cookie => cookie.name === 'sessionid')?.value || '';
+          const csrftoken = cookies.find(cookie => cookie.name === 'csrftoken')?.value || '';
 
-      // Send the URL to your Flask server
-      fetch('http://127.0.0.1:5050/download', {  // Replace with your Flask server URL
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url: currentTabUrl,
-          sessionid: 'u2krtexbnyx58xkjwye6r7e6jza6h35r', // Replace with dynamic session ID if needed
-          qbusername: qbusername,
-          qbpassword: qbpassword,
-          qbServer: qbServer
-        })
-      })
-        .then(response => response.json())
-        .then(data => alert(data.message || 'URL sent successfully!'))
-        .catch(error => console.error('Error:', error));
-    });
+          if (!sessionid || !csrftoken) {
+              alert('Session ID or CSRF token not found!');
+              return;
+          }
+
+          chrome.storage.sync.get(['qbusername', 'qbpassword', 'qbServer'], (result) => {
+              const qbusername = result.qbusername || 'admin';
+              const qbpassword = result.qbpassword || 'admin admin';
+              const qbServer = result.qbServer || 'http://localhost:8081';
+
+              fetch('http://127.0.0.1:5050/download', {  // Replace with your Flask server URL
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'x-csrftoken': csrftoken  // Include the retrieved CSRF token
+                  },
+                  body: JSON.stringify({
+                      url: currentTab.url,
+                      sessionid: sessionid,
+                      qbusername: qbusername,
+                      qbpassword: qbpassword,
+                      qbServer: qbServer
+                  })
+              })
+              .then(response => response.json())
+              .then(data => alert(data.message || 'URL sent successfully!'))
+              .catch(error => console.error('Error:', error));
+          });
+      });
   });
 });
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
