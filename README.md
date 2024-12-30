@@ -14,7 +14,7 @@ A browser extension that allows users to modify URLs by appending custom text an
 4. **Intuitive UI**: Control everything with sliders and text fields in the extension’s popup.
 
 ## (Recomended) Installation:
-1. Download from chrome Web store under (palceholder until google accepts it!)
+1. Download from chrome Web store
 
 ## Installation:
 1. Download the extension from this repository.
