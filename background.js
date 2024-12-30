@@ -1,113 +1,97 @@
-let isRedirecting = false;  // Global flag to prevent infinite redirection
-
-function modifyUrlAndPerformAction(details) {
-  const { tabId, url } = details;
-
-  // If we're already redirecting, do nothing to avoid a loop
-  if (isRedirecting) {
-    isRedirecting = false;  // Reset the flag once the redirection is done
-    return;
-  }
-
-  // Retrieve the auto-download, URL append, and path check states from storage
-  chrome.storage.sync.get(['autoDownloadState', 'appendState', 'appendText', 'pathCheckState', 'pathCheckText'], (result) => {
-    const autoDownloadState = result.autoDownloadState ?? false;
-    const appendState = result.appendState ?? false;
-    const appendText = result.appendText || 'download'; // Use 'download' as default if input is empty
-    const pathCheckState = result.pathCheckState ?? false;
-    const pathCheckText = result.pathCheckText || 'g/'; // Use 'g/' as default if input is empty
-
-    let modifiedUrl = new URL(url);
-    let needsRedirection = false;
-
-    // If the path check slider is enabled, ensure the URL contains the required path
-    if (pathCheckState) {
-      if (!modifiedUrl.pathname.includes(pathCheckText)) {
-        // If the URL does not contain the specified path, do nothing
-        return;
-      }
-    }
-
-    // If the append slider is enabled and the text is not already appended, modify the URL
-    if (appendState && appendText) {
-      if (!modifiedUrl.pathname.endsWith(appendText)) {  // Check if the text is already appended
-        modifiedUrl.pathname += appendText;
-        needsRedirection = true;
-      }
-    }
-
-    // If the auto-download slider is enabled
-    if (autoDownloadState) {
-      if (needsRedirection) {
-        // Only download from the modified URL directly (without redirecting the tab)
-// Trigger the download without prompting "Save As"
-chrome.downloads.download({
-  url: modifiedUrl.href,  // Use the modified URL for the download
-  conflictAction: 'uniquify'  // Handle filename conflicts (download without asking)
-}, function (downloadId) {
-  if (chrome.runtime.lastError) {
-    console.error("Download failed:", chrome.runtime.lastError);
-  } else {
-    console.log("Download started with ID:", downloadId);
-  }
-});
-
-
-        // Close the current tab after download, but avoid redirection
-        chrome.tabs.remove(tabId);
-      } else {
-        // If no redirection is required, download from the current URL
-        chrome.downloads.download({
-          url: url,  // Use the original URL for the download
-          conflictAction: 'uniquify',
-          saveAs: true
-        }, function (downloadId) {
-          if (chrome.runtime.lastError) {
-            console.error("Download failed:", chrome.runtime.lastError);
-          } else {
-            console.log("Download started with ID:", downloadId);
-          }
-        });
-
-        // Close the current tab after download
-        chrome.tabs.remove(tabId);
-      }
-    } else if (needsRedirection) {
-      // If the tab needs to be redirected (for URL appending)
-      isRedirecting = true;  // Set the flag to prevent infinite loop
-      chrome.tabs.update(tabId, { url: modifiedUrl.href });  // Redirect the tab
-    }
-  });
-}
-
-// Function to manage adding/removing the webNavigation listener
-function updateWebNavigationListener(isAutoDownloadOn, isAppendOn) {
-  if (isAutoDownloadOn || isAppendOn) {
-    chrome.webNavigation.onBeforeNavigate.addListener(modifyUrlAndPerformAction);
-  } else {
-    chrome.webNavigation.onBeforeNavigate.removeListener(modifyUrlAndPerformAction);
-  }
-}
-
-// Load the initial slider states from storage and set up the listener accordingly
-chrome.storage.sync.get(['autoDownloadState', 'appendState', 'pathCheckState'], (result) => {
-  const isAutoDownloadOn = result.autoDownloadState ?? false;
-  const isAppendOn = result.appendState ?? false;
-  const isPathCheckOn = result.pathCheckState ?? false;
-  updateWebNavigationListener(isAutoDownloadOn, isAppendOn, isPathCheckOn);
-});
-
-// Listen for messages to update the slider states and manage the listener
-chrome.runtime.onMessage.addListener((message) => {
-  if (message.autoDownloadState !== undefined || message.appendState !== undefined || message.pathCheckState !== undefined) {
-    const isAutoDownloadOn = message.autoDownloadState ?? false;
-    const isAppendOn = message.appendState ?? false;
-    const isPathCheckOn = message.pathCheckState ?? false;
-    updateWebNavigationListener(isAutoDownloadOn, isAppendOn, isPathCheckOn);
-    chrome.storage.sync.set({
-      autoDownloadState: isAutoDownloadOn,
-      appendState: isAppendOn,
-      pathCheckState: isPathCheckOn
+// Get cookies for a specific URL
+async function getCookie(url, name) {
+    return new Promise((resolve, reject) => {
+      chrome.cookies.get({ url: url, name: name }, (cookie) => {
+        if (cookie) {
+            console.log(cookie.value);
+          resolve(cookie.value); // Return the cookie value
+        } else {
+          console.error(`Cookie ${name} not found for URL: ${url}`);
+          resolve(null); // Or reject if you prefer to handle missing cookies
+        }
+      });
     });
   }
-});
+  
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && tab.url) {
+      chrome.storage.sync.get(['autoDownloadEnabled'], async (result) => {
+        if (result.autoDownloadEnabled && tab.url.includes('/g/')) {
+          console.log('Detected URL with "/g/":', tab.url);
+          const fullUrl = tab.url;
+  
+          // Fetch sessionid and csrftoken cookies
+          const sessionid = await getCookie(fullUrl, "sessionid");
+          const csrftoken = await getCookie(fullUrl, "csrftoken");
+  
+          if (!sessionid || !csrftoken) {
+            console.error("Required cookies are missing!");
+            return;
+          }
+  
+          console.log('Session ID:', sessionid);
+          console.log('CSRF Token:', csrftoken);
+  
+          // Prepare headers and cookies
+          const headers = {
+            "accept": "*/*",
+            "accept-language": "en-US,en;q=0.8",
+            "priority": "u=1, i",
+            "sec-ch-ua": "\"Brave\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "sec-gpc": "1",
+            "x-csrftoken": csrftoken,  // Include the csrf token here
+            "x-requested-with": "XMLHttpRequest",
+            "referer": fullUrl,
+          };
+  
+          const cookies = {
+            "csrftoken": csrftoken,
+            "sessionid": sessionid,
+          };
+  
+          console.log('Headers:', headers);
+          console.log('Cookies:', cookies);
+  
+          try {
+            const response = await makeApiRequest(tab.url, headers, cookies);
+            console.log('API Response:', response);
+          } catch (error) {
+            console.error('Error in API Request:', error);
+          }
+        }
+      });
+    }
+  });
+  
+  // Make the API request
+  async function makeApiRequest(url, headers, cookies) {
+    try {
+      const response = await fetch('http://127.0.0.1:9998/fabdownload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: url,
+          headers: headers,
+          cookies: cookies
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log('API Response:', data);
+      return data;
+    } catch (error) {
+      console.error("Network or API request error:", error);
+    }
+  }

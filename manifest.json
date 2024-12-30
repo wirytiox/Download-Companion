@@ -1,18 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Automatic Link Appender",
-  "version": "1.5.0", 
+  "version": "2.0.0",
   "description": "Easily download files from simple download links with a single middle click.",
-"permissions": [
+  "permissions": [
     "cookies",
     "webNavigation",
     "storage",
     "downloads",
-    "<all_urls>"
-],
-"host_permissions": [
-    "<all_urls>"
-],
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*/*"
+  ],
   "web_accessible_resources": [
     {
       "resources": ["popup.js", "popup.css"],
@@ -26,7 +27,7 @@
       "32": "logos/logo_32x32_transparent.png",
       "48": "logos/logo_48x48_transparent.png"
     }
-  },
+  },  
   "background": {
     "service_worker": "background.js"
   }

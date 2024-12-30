@@ -1,12 +1,30 @@
-/* General body styling */
 body {
-  font-family: Arial, sans-serif;
-  margin: 15px;
-  width: auto; /* Adjusts width based on content */
-  height: auto; /* Adjusts height based on content */
-  overflow: auto; /* Allows scrolling if content overflows */
-  max-width: 300px; /* Adjust as needed to fit your design */
-}
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    margin: 0;
+    width: 200px;
+  }
+  
+  h1 {
+    font-size: 16px;
+    text-align: center;
+  }
+  
+  button {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
 
 /* Slider container styling */
 .slider-container {
